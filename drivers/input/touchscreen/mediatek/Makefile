@@ -1,0 +1,21 @@
+subdir-ccflags-y += -Werror
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/include/mt-plat/
+ccflags-y += -I$(srctree)/drivers/input/touchscreen/mediatek
+ccflags-y += -I$(srctree)/drivers/misc/mediatek/include/mt-plat/$(MTK_PLATFORM)/include
+# In case the platform does NOT support this type of sensors
+obj-y   +=  mtk_tpd.o
+obj-y   +=  tpd_button.o
+obj-y   +=  tpd_calibrate.o
+obj-y   +=  tpd_debug.o
+obj-y   +=  tpd_default.o
+obj-y   +=  tpd_misc.o
+obj-y   +=  tpd_setting.o
+obj-$(CONFIG_TOUCHSCREEN_MTK_FOCALTECH_TS)	+=  focaltech_touch/
+obj-$(CONFIG_TOUCHSCREEN_MTK_FOCALTECH_TS_FT8006P)	+=  focaltech_touch_ft8006p/
+obj-$(CONFIG_TOUCHSCREEN_MTK_FOCALTECH_TS_FT8006P_BOE)	+=  focaltech_touch_ft8006p_boe/
+obj-$(CONFIG_TOUCHSCREEN_HIMAX_CHIPSET)	+= hxchipset/
+obj-$(CONFIG_TOUCHSCREEN_HIMAX_CHIPSET_651R)	+= hxchipset_651r/
+obj-$(CONFIG_TOUCHSCREEN_MTK_ILITEK_TS)	+= Ilitek_touch/
+obj-$(CONFIG_TOUCHSCREEN_MTK_ILITEK_9882H_TS)	+= Ilitek_9882h/
+obj-$(CONFIG_TOUCHSCREEN_CHIPONE) += chipone_tddi/
+obj-$(CONFIG_TOUCHSCREEN_MTK_ILITEK_V3_9882H_TS)	+= ILITEK_V3/

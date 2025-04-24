@@ -1,0 +1,48 @@
+#
+#Fingerprint
+#
+menu "Fingerprint support"
+	depends on INPUT
+
+config MTK_FINGERPRINT_SUPPORT
+	bool "Mediatek Fingerprint"
+	default n
+	help
+	  Fingerprint mtk driver enable/disable
+	  in the kernel.Say Y here if you want to
+	  use mediatek fingerprint driver,fingerprint
+	  driver will support fingerprint function
+
+config MTK_FINGERPRINT_SELECT
+	string "sensor type"
+	default "GF318M"
+	
+#+Bug584789 liaomingzhe.wt, ADD, 20200928, fingerprint bringup
+config CDFINGER_RO
+    bool "cdfinger Fingerprint"
+    default n
+    ---help---
+    cdfinger fingerprint chip.
+
+config CHIPONE_FINGERPRINT
+	bool "chipone Fingerprint"
+	default n
+	help
+	  chipone fingerprint 7332 device.
+#-Bug584789 liaomingzhe.wt, ADD, 20200928, fingerprint bringup
+
+#+Bug, xiaoguang.wt, add, 20200928, add fingerprint driver bringup
+config CDFINGER_FP
+    bool "cdfinger Fingerprint"
+    default n
+    ---help---
+    cdfinger fingerprint chip.
+
+config SILEAD_FP
+    bool "silead Fingerprint"
+    default n
+    ---help---
+    silead fingerprint chip.    
+#-Bug, xiaoguang.wt, add, 20200928, add fingerprint driver bringup
+
+endmenu

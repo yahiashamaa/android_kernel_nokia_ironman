@@ -1,0 +1,1 @@
+obj-y += ronin_gc8034_front_lh_mipi_Sensor.o
