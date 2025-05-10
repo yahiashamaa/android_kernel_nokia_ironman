@@ -25,13 +25,12 @@
 	/* chosen */
 	chosen: chosen {
 		bootargs = "console=tty0 console=ttyS0,921600n1 vmalloc=400M \
-slub_debug=OFZPU page_owner=on \
-swiotlb=noforce \
-cgroup.memory=nosocket,nokmem \
-androidboot.hardware=mt6761 \
-maxcpus=8 loop.max_part=7 \
-firmware_class.path=/vendor/firmware";
-		kaslr-seed = <0 0>;
+				slub_debug=OFZPU page_owner=on \
+				swiotlb=noforce \
+				cgroup.memory=nosocket,nokmem \
+				androidboot.hardware=mt6761 \
+				maxcpus=8 loop.max_part=7 \
+				firmware_class.path=/vendor/firmware";
 	};
 
 	cluster0_opp: opp_table0 {
@@ -258,7 +257,8 @@ firmware_class.path=/vendor/firmware";
 		reg = <0 0x40000000 0 0x20000000>;
 	};
 
-	reserved_memory: reserved-memory {
+	reserved-memory {
+		/*TODO: add reserved memory node here*/
 		#address-cells = <2>;
 		#size-cells = <2>;
 		ranges;
@@ -267,7 +267,7 @@ firmware_class.path=/vendor/firmware";
 			compatible = "mediatek,reserve-memory-sspm_share";
 			no-map;
 			status = "okay";
-#if defined(CONFIG_MTK_GMO_RAM_OPTIMIZE) || defined(CONFIG_MTK_MET_MEM_ALLOC)
+#ifdef CONFIG_MTK_GMO_RAM_OPTIMIZE
 			size = <0 0x110000>; /* 1M + 64K */
 #else
 			size = <0 0x510000>; /* 5M + 64K */
@@ -279,7 +279,11 @@ firmware_class.path=/vendor/firmware";
 		reserve-memory-scp_share {
 			compatible = "mediatek,reserve-memory-scp_share";
 			no-map;
+#ifdef CONFIG_MTK_TINYSYS_SCP_LOGGER_SUPPORT
 			size = <0 0x00300000>;
+#else
+			size = <0 0x00100000>;
+#endif
 			alignment = <0 0x1000000>;
 			alloc-ranges = <0 0x40000000 0 0x50000000>;
 		};
@@ -748,8 +752,12 @@ firmware_class.path=/vendor/firmware";
 				  <9 10>;   /* vow dump */
 
 		scp_mem_key = "mediatek,reserve-memory-scp_share";
+#ifdef CONFIG_MTK_TINYSYS_SCP_LOGGER_SUPPORT
 		scp_mem_tbl = <1 0x100000>, /* sensor */
 			      <4 0x200000>; /* logger */
+#else
+		scp_mem_tbl = <1 0x100000>; /* sensor */
+#endif
 	};
 
 	scp_dvfs {
@@ -813,8 +821,23 @@ firmware_class.path=/vendor/firmware";
 		status = "okay";
 	};
 
+	//+bug585487,wangyongfei_wt,20200917,add,google-key
+	key_google: key_google {
+		compatible = "mediatek, key_google_key-eint";
+		interrupt-parent = <&pio>;
+		interrupts = <3 IRQ_TYPE_LEVEL_LOW 3 0>;
+                deb-gpios = <&pio 3 0>;
+	        debounce = <64000>;
+		status = "okay";
+	};
+	//-bug585487,wangyongfei_wt,20200917,add,google-key
+
 	touch: touch {
-		compatible = "goodix,touch";
+		compatible = "mediatek,touch";
+	};
+
+	lcm: lcm_gpio {
+		compatible = "mediatek,lcm_gpio";
 	};
 
 	accdet: accdet {
@@ -1828,10 +1851,8 @@ firmware_class.path=/vendor/firmware";
 		mediatek,cali-ge-bit = <10>;
 		/* 3. Auxadc cali oe bits shift */
 		mediatek,cali-oe-bit = <0>;
-		/* 4. Auxadc cali efuse reg offset */
-		mediatek,cali-efuse-reg-offset = <0x1A8>;
-		nvmem = <&efuse>;
-		nvmem-names = "mtk_efuse";
+		/* 4. Auxadc cali efuse index */
+		mediatek,cali-efuse-index = <106>;
 		#interconnect-cells = <1>;
 	};
 
@@ -1848,7 +1869,7 @@ firmware_class.path=/vendor/firmware";
 		clocks = <&infracfg_ao CLK_IFR_AP_DMA>;
 		clock-names = "apdma";
 		dma-requests = <4>;
-		dma-bits = <34>;
+		#dma-bits = <34>;
 		#dma-cells = <1>;
 	};
 
@@ -2267,7 +2288,8 @@ firmware_class.path=/vendor/firmware";
 		clock-names = "usb0",
 			"usb0_clk_top_sel",
 			"usb0_clk_univpll3_d4";
-		charger = <&mt6370_chg>;
+		// bug584994 wangguanyu.wt, Modify, 20200910, mtk patch fix can't open adb
+		charger = <&mtk_charger_type>;
 		/*-effuse access-*/
 		nvmem-cells = <&efuse_analog7>;
 		nvmem-cell-names = "efuse_idx107";
@@ -2386,7 +2408,6 @@ firmware_class.path=/vendor/firmware";
 		/*INFRA MISC, conn_bt_cvsd_mask*/
 		/*cvsd_mcu_read, write, packet_indicator*/
 		mediatek,offset =<0xf00 0x800 0x140 0x144 0x148>;
-		disable_write_silence = <0>;
 	};
 
 	mipi_rx_ana_csi0a: mipi_rx_ana_csi0a@11c10000 {
@@ -2970,6 +2991,14 @@ mipi_rx_ana_csi0b: mipi_rx_ana_csi0b@11c11000 {
 		};
 	};
 
+	flashlights_aw3644: flashlights_aw3644 {
+		compatible = "mediatek,flashlights_aw3644";
+	};
+	//+ bug590448,cdzk,20200923,add,camera flash bring up
+	flashlights_ocp8132a: flashlights_ocp8132a {
+		compatible = "mediatek,flashlights_ocp8132a";
+	};
+	//- bug590448,cdzk,20200923,add,camera flash bring up
 	vcodecsys: vcodecsys@17000000 {
 		compatible =  "mediatek,mt6761-vcodecsys", "syscon";
 		reg = <0 0x17000000 0 0x10000>;
@@ -3218,19 +3247,19 @@ mipi_rx_ana_csi0b: mipi_rx_ana_csi0b@11c11000 {
 	lk_charger: lk_charger {
 		compatible = "mediatek,lk_charger";
 		enable_anime;
-		enable_pe_plus;
-		enable_pd20_reset;
-		power_path_support;
+		//enable_pe_plus;
+		//enable_pd20_reset;
+		//power_path_support;
 		max_charger_voltage = <6500000>;
 		fast_charge_voltage = <3000000>;
 
 		/* charging current */
 		usb_charger_current = <500000>;
-		ac_charger_current = <2050000>;
-		ac_charger_input_current = <3200000>;
-		non_std_ac_charger_current = <500000>;
+		ac_charger_current = <1550000>;
+		ac_charger_input_current = <1500000>;
+		non_std_ac_charger_current = <900000>;
 		charging_host_charger_current = <1500000>;
-		ta_ac_charger_current = <3000000>;
+		ta_ac_charger_current = <1550000>;
 		pd_charger_current = <500000>;
 
 		/* battery temperature protection */
@@ -3344,7 +3373,7 @@ mipi_rx_ana_csi0b: mipi_rx_ana_csi0b@11c11000 {
 	charger: charger {
 		compatible = "mediatek,charger";
 		gauge = <&mtk_gauge>;
-		charger = <&mt6370_chg>;
+		charger = <&mtk_charger_type>;//<&mt6370_chg>;//Bug585485, jinpeng1.wt 20200915,modify, add charger(bq24157) driver
 		bootmode = <&chosen>;
 		pmic = <&main_pmic>;
 
@@ -3352,42 +3381,57 @@ mipi_rx_ana_csi0b: mipi_rx_ana_csi0b@11c11000 {
 		charger_configuration= <0>;
 
 		/* common */
-		battery_cv = <4350000>;
+		battery_cv = <4400000>;//Bug585485, jinpeng1.wt 20200915,modify, add charger(bq24157) driver
 		max_charger_voltage = <6500000>;
 		min_charger_voltage = <4600000>;
 
 		/* sw jeita */
 		/* enable_sw_jeita; */
-		jeita_temp_above_t4_cv = <4240000>;
-		jeita_temp_t3_to_t4_cv = <4240000>;
-		jeita_temp_t2_to_t3_cv = <4340000>;
-		jeita_temp_t1_to_t2_cv = <4240000>;
-		jeita_temp_t0_to_t1_cv = <4040000>;
-		jeita_temp_below_t0_cv = <4040000>;
-		temp_t4_thres = <50>;
-		temp_t4_thres_minus_x_degree = <47>;
+                /* +Bug585485, jinpegn1.wt 20200915,modify, add charger(bq24157) driver porting code AA2*/
+		enable_sw_jeita;//bug 585485,jinpeng1.wt,2020.10.13,add,add jeita function
+		jeita_temp_above_t4_cv = <4100000>;
+		jeita_temp_t3_to_t4_cv = <4100000>;
+		jeita_temp_t2_to_t3_cv = <4400000>;
+		jeita_temp_t1_to_t2_cv = <4400000>;
+		jeita_temp_t0_to_t1_cv = <4400000>;
+		jeita_temp_below_t0_cv = <4400000>;
+		jeita_temp_above_t4_cc = <0>;
+		jeita_temp_t3_to_t4_cc = <1550000>;
+		jeita_temp_t2_to_t3_cc = <1550000>;
+		jeita_temp_t1_to_t2_cc = <750000>;
+		jeita_temp_t0_to_t1_cc = <0>;
+		jeita_temp_below_t0_cc = <0>;
+		temp_t4_thres = <54>;
+		temp_t4_thres_minus_x_degree = <52>;
 		temp_t3_thres = <45>;
-		temp_t3_thres_minus_x_degree = <39>;
-		temp_t2_thres = <10>;
+		temp_t3_thres_minus_x_degree = <43>;
+		temp_t2_thres = <15>;
 		temp_t2_thres_plus_x_degree = <16>;
-		temp_t1_thres = <0>;
-		temp_t1_thres_plus_x_degree = <6>;
-		temp_t0_thres = <0>;
-		temp_t0_thres_plus_x_degree = <0>;
-		temp_neg_10_thres = <0>;
+		temp_t1_thres = <2>;
+		temp_t1_thres_plus_x_degree = <4>;
+		temp_t0_thres = <2>;
+		temp_t0_thres_plus_x_degree = <2>;
+		temp_neg_10_thres = <2>;
 
 		/* battery temperature protection */
 		enable_min_charge_temp;
 		min_charge_temp = <0>;
-		min_charge_temp_plus_x_degree = <6>;
-		max_charge_temp = <50>;
-		max_charge_temp_minus_x_degree = <47>;
+		min_charge_temp_plus_x_degree = <2>;
+		max_charge_temp = <54>;
+		max_charge_temp_minus_x_degree = <52>;
 
 		/* charging current */
+		usb_charger_current_suspend = <0>;
+		usb_charger_current_unconfigured = <70000>;
+		usb_charger_current_configured = <500000>;
 		usb_charger_current = <500000>;
-		ac_charger_current = <2050000>;
-		ac_charger_input_current = <3200000>;
+		ac_charger_current = <1550000>;
+		ac_charger_input_current = <1500000>;
+		non_std_ac_charger_current = <900000>;
 		charging_host_charger_current = <1500000>;
+		apple_1_0a_charger_current = <650000>;
+		apple_2_1a_charger_current = <800000>;
+		ta_ac_charger_current = <1550000>;
 
 		/* dynamic mivr */
 		enable_dynamic_mivr;
@@ -3522,5 +3566,4 @@ mipi_rx_ana_csi0b: mipi_rx_ana_csi0b@11c11000 {
 #include "mediatek/bat_setting/mt6761_battery_prop.dtsi"
 #include "mediatek/mt6370.dtsi"
 #include "mediatek/mt6370_pd.dtsi"
-
 

@@ -105,19 +105,19 @@
 
 	mtk_gauge: mtk_gauge {
 		compatible = "mediatek,mt6357-gauge";
-// bug584789 lishuwen.wt, Modify, 20200923, mtk patch fix can't open adb
+		// bug584994 wangguanyu.wt, Modify, 20200910, mtk patch fix can't open adb
 		charger = <&mtk_charger_type>;
 		bootmode = <&chosen>;
 		io-channels = <&pmic_auxadc AUXADC_BAT_TEMP>,
-				<&pmic_auxadc AUXADC_ISENSE>,
+				<&pmic_auxadc AUXADC_BATADC>,
 				<&pmic_auxadc AUXADC_VBIF>,
 				<&pmic_auxadc AUXADC_IMP>,
-				<&pmic_auxadc AUXADC_IMIX_R>;
+				<&auxadc 2>;
 		io-channel-names = "pmic_battery_temp",
 				"pmic_battery_voltage",
 				"pmic_bif_voltage",
 				"pmic_ptim_voltage",
-				"pmic_ptim_r";
+				"batteryID-channel";
 		nvmem-cells = <&fg_init>, <&fg_soc>;
 		nvmem-cell-names = "initialization", "state-of-charge";
 	};
@@ -126,8 +126,8 @@
 		compatible = "mediatek,mt6357-charger-type";
 		io-channels = <&pmic_auxadc AUXADC_VCDT>;
 		io-channel-names = "pmic_vbus";
-// bug584789 lishuwen.wt, Modify, 20200923, mtk patch fix can't open adb
-		bc12_active = <0>; //Chk 4535,lizerong,modify,20201016,logic ic bringup
+		// bug584994 wangguanyu.wt, Modify, 20200910, mtk patch fix can't open adb
+		bc12_active = <1>;
 	};
 
 	mt6357_charger: mt6357_charger {
@@ -185,6 +185,7 @@
 			regulator-max-microvolt = <2200000>;
 			regulator-ramp-delay = <12500>;
 			regulator-enable-ramp-delay = <220>;
+			regulator-always-on;
 		};
 		mt_pmic_vmodem_buck_reg: buck_vmodem {
 			regulator-name = "vmodem";
@@ -192,6 +193,7 @@
 			regulator-max-microvolt = <1193750>;
 			regulator-ramp-delay = <6250>;
 			regulator-enable-ramp-delay = <220>;
+			regulator-always-on;
 		};
 		mt_pmic_vcore_buck_reg: buck_vcore {
 			regulator-name = "vcore";
@@ -199,6 +201,7 @@
 			regulator-max-microvolt = <1312500>;
 			regulator-ramp-delay = <6250>;
 			regulator-enable-ramp-delay = <220>;
+			regulator-always-on;
 		};
 		mt_pmic_vproc_buck_reg: buck_vproc {
 			regulator-name = "vproc";
@@ -206,6 +209,7 @@
 			regulator-max-microvolt = <1312500>;
 			regulator-ramp-delay = <6250>;
 			regulator-enable-ramp-delay = <220>;
+			regulator-always-on;
 		};
 		mt_pmic_vpa_buck_reg: buck_vpa {
 			regulator-name = "vpa";
@@ -298,6 +302,7 @@
 			regulator-max-microvolt = <1312500>;
 			regulator-ramp-delay = <6250>;
 			regulator-enable-ramp-delay = <110>;
+			regulator-always-on;
 		};
 		mt_pmic_vsram_proc_ldo_reg: ldo_vsram_proc {
 			regulator-name = "vsram_proc";
@@ -305,36 +310,42 @@
 			regulator-max-microvolt = <1312500>;
 			regulator-ramp-delay = <6250>;
 			regulator-enable-ramp-delay = <110>;
+			regulator-always-on;
 		};
 		mt_pmic_vaux18_ldo_reg: ldo_vaux18 {
 			regulator-name = "vaux18";
 			regulator-min-microvolt = <1800000>;
 			regulator-max-microvolt = <1800000>;
 			regulator-enable-ramp-delay = <264>;
+			regulator-always-on;
 		};
 		mt_pmic_vaud28_ldo_reg: ldo_vaud28 {
 			regulator-name = "vaud28";
 			regulator-min-microvolt = <2800000>;
 			regulator-max-microvolt = <2800000>;
 			regulator-enable-ramp-delay = <264>;
+			regulator-always-on;
 		};
 		mt_pmic_vio28_ldo_reg: ldo_vio28 {
 			regulator-name = "vio28";
 			regulator-min-microvolt = <2800000>;
 			regulator-max-microvolt = <2800000>;
 			regulator-enable-ramp-delay = <264>;
+			regulator-always-on;
 		};
 		mt_pmic_vio18_ldo_reg: ldo_vio18 {
 			regulator-name = "vio18";
 			regulator-min-microvolt = <1800000>;
 			regulator-max-microvolt = <1800000>;
 			regulator-enable-ramp-delay = <264>;
+			regulator-always-on;
 		};
 		mt_pmic_vdram_ldo_reg: ldo_vdram {
 			regulator-name = "vdram";
 			regulator-min-microvolt = <1100000>;
 			regulator-max-microvolt = <1200000>;
 			regulator-enable-ramp-delay = <3300>;
+			regulator-always-on;
 		};
 		mt_pmic_vmc_ldo_reg: ldo_vmc {
 			regulator-name = "vmc";
@@ -353,6 +364,7 @@
 			regulator-min-microvolt = <2900000>;
 			regulator-max-microvolt = <3300000>;
 			regulator-enable-ramp-delay = <44>;
+			regulator-always-on;
 		};
 		mt_pmic_vsim1_ldo_reg: ldo_vsim1 {
 			regulator-name = "vsim1";
@@ -377,6 +389,7 @@
 			regulator-min-microvolt = <3000000>;
 			regulator-max-microvolt = <3100000>;
 			regulator-enable-ramp-delay = <264>;
+			regulator-always-on;
 		};
 	};
 
@@ -405,16 +418,6 @@
 
 	mt63xx-oc-debug {
 		compatible = "mediatek,mt63xx-oc-debug";
-	};
-
-	leds-mt6357 {
-		compatible = "mediatek,mt6357_leds";
-		Isink1 {
-			reg = <1>;
-			label = "red";
-			linux,default-trigger = "none";
-			default-state = "off";
-		};
 	};
 
 	mtk_rtc: mtk_rtc {

@@ -23,7 +23,7 @@
 		mt6370pd,intr_gpio = <&pio 24 0x0>;
 		mt6370pd,intr_gpio_num = <24>;
 
-		charger = <&mtk_charger_type>; //Chk 4535,lizerong,modify,20201016,logic ic bringup
+		charger = <&mt6370_chg>;
 
 		pd-data {
 			pd,vid = <0x29cf>;
