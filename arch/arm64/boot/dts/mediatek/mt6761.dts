@@ -304,14 +304,6 @@
 			alloc-ranges = <0 0x40000000 0 0x80000000>;
 		};
 
-		ssmr_cma_mem: ssmr-reserved-cma_memory {
-			compatible = "shared-dma-pool";
-			reusable;
-			size = <0 0x10000000>;
-			alignment = <0 0x1000000>;
-			alloc-range = <0 0xc0000000 0 0x10000000>;
-		};
-
 #ifdef CONFIG_MICROTRUST_TEE_SUPPORT
 		soter-shared-mem {
 			compatible = "microtrust,shared_mem";
@@ -572,7 +564,6 @@
 			      "syscon", "simple-mfd";
 		reg = <0 0x10007000 0 0x1000>;
 		interrupts = <GIC_SPI 83 IRQ_TYPE_NONE>;
-		mediatek,rg_dfd_timeout = <0xa0>;
 		#reset-cells = <1>;
 		reboot-mode {
 			compatible = "syscon-reboot-mode";
@@ -3071,40 +3062,6 @@ mipi_rx_ana_csi0b: mipi_rx_ana_csi0b@11c11000 {
 		/* reserved for overlay by odm */
 	};
 
-	memory_ssmr_features: memory-ssmr-features {
-		compatible = "mediatek,memory-ssmr-features";
-#if defined(CONFIG_MTK_SEC_VIDEO_PATH_SUPPORT) || \
-	defined(CONFIG_TRUSTONIC_TEE_SUPPORT) || \
-	defined(CONFIG_MICROTRUST_TEE_SUPPORT)
-		svp-size = <0 0x10000000>;
-#endif
-#ifdef CONFIG_MTK_CAM_SECURITY_SUPPORT
-		2d_fr-size = <0 0x8000000>;
-#endif
-#if defined(CONFIG_TRUSTONIC_TRUSTED_UI) || \
-	defined(CONFIG_BLOWFISH_TUI_SUPPORT)
-		tui-size = <0 0x4000000>;
-#endif
-#ifdef CONFIG_MTK_SEC_VIDEO_PATH_SUPPORT
-		wfd-size = <0 0x4000000>;
-#endif
-#ifdef CONFIG_MTK_PROT_MEM_SUPPORT
-		prot-sharedmem-size = <0 0x8000000>;
-#endif
-#ifdef CONFIG_MTK_HAPP_MEM_SUPPORT
-		ta-elf-size = <0 0x1000000>;
-#endif
-#ifdef CONFIG_MTK_HAPP_MEM_SUPPORT
-		ta-stack-heap-size = <0 0x6000000>;
-#endif
-#ifdef CONFIG_MTK_SDSP_SHARED_MEM_SUPPORT
-		sdsp-tee-sharedmem-size = <0 0x1000000>;
-#endif
-#ifdef CONFIG_MTK_SDSP_MEM_SUPPORT
-		sdsp-firmware-size = <0 0x1000000>;
-#endif
-	};
-
 	audio_snd_card {
 		compatible = "mediatek,audio_snd_card";
 	};
@@ -3183,13 +3140,6 @@ mipi_rx_ana_csi0b: mipi_rx_ana_csi0b@11c11000 {
 
 	mt_soc_voice_md2 {
 		compatible = "mediatek,mt_soc_pcm_voice_md2";
-	};
-
-	mt_soc_pcm_dl1_scp_spk {
-		compatible = "mediatek,mt_soc_pcm_dl1_scp_spk";
-	};
-	mt_soc_pcm_voice_scp {
-		compatible = "mediatek,mt_soc_pcm_voice_scp";
 	};
 
 	mt_soc_routing_pcm {
@@ -3438,6 +3388,7 @@ mipi_rx_ana_csi0b: mipi_rx_ana_csi0b@11c11000 {
 		min_charger_voltage_1 = <4400000>;
 		min_charger_voltage_2 = <4200000>;
 		max_dmivr_charger_current = <1800000>;
+                /* -Bug585485, jinpeng1.wt 20200915,modify, add charger(bq24157) driver porting code AA2*/
 	};
 
 	pd_adapter: pd_adapter {
@@ -3448,11 +3399,6 @@ mipi_rx_ana_csi0b: mipi_rx_ana_csi0b@11c11000 {
 	rt9465_slave_chr: rt9465_slave_chr {
 		compatible = "richtek,rt9465";
 		status = "disabled";
-	};
-
-	ssmr {
-		compatible = "mediatek,trusted_mem";
-		memory-region = <&ssmr_cma_mem>;
 	};
 
 	rt-pd-manager {
