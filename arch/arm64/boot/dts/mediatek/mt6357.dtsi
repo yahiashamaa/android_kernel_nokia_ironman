@@ -229,6 +229,7 @@
 			regulator-min-microvolt = <2200000>;
 			regulator-max-microvolt = <2400000>;
 			regulator-enable-ramp-delay = <110>;
+			regulator-always-on;
 		};
 		mt_pmic_vrf18_ldo_reg: ldo_vrf18 {
 			regulator-name = "vrf18";
